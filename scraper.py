@@ -1,12 +1,16 @@
 import instaloader
 import pandas as pd
 import numpy
- 
+import sqlite3
+
+# # Creating an instance of the Instaloader class
+bot = instaloader.Instaloader()
+# #bot.login(user="Your_username",passwd="Your_password") #Use this code to log-in to your account.
+
 def read(path):
     # creating a data frame
-    bot = instaloader.Instaloader()
     df = pd.read_csv(path)
-    counter = 0
+    # counter = 0
 
     for i in df.index:
         for col in df.columns[1:]:
@@ -17,11 +21,37 @@ def read(path):
                     counter += 1
             except instaloader.ConnectionException:
                 print(f"Error with user: {df.loc[i,col]}")
-    print(counter)
+    # print(counter)
 
-# # Creating an instance of the Instaloader class
-bot = instaloader.Instaloader()
-# #bot.login(user="Your_username",passwd="Your_password") #Use this code to log-in to your account.
+def sql():
+    con = sqlite3.connect("instagram_artists_apresearch.db")
+    cursor = con.cursor()
+
+    # cmd = ""
+    # cmd = """CREATE TABLE profiles(
+    # user_id INT,
+    # username VARCHAR(30),
+    # num_followers INT,
+    # num_posts INT,
+    # is_human BOOLEAN,
+    # PRIMARY KEY (user_id)
+    # );"""
+
+    # cursor.execute(cmd)
+
+    # cmd = """CREATE TABLE posts(
+    # owner_user_id INT,
+    # owner_username VARCHAR(30),
+    # num_likes INT,
+    # num_comments INT,
+    # shortcode VARCHAR(255),
+    # img_url VARCHAR(255),
+    # post_date DATE,
+    # is_reel BOOLEAN,
+    # FOREIGN KEY(owner_user_id) REFERENCES Profiles(user_id)
+    # );"""
+
+    # cursor.execute(cmd)
 
 
 def getBasicInfo():
@@ -56,6 +86,7 @@ def downloadPost():
         #     break
     
 if __name__ == '__main__':
+    # sql()
     option = '0'
     while option != '5':
         option = input('Select Your option\n1)Get Profile Info\n2)Download Profile Posts\n3)Read CSV\n4)Exit\n')
