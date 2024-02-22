@@ -24,8 +24,8 @@ def read(path):
     # print(counter)
 
 def sql():
-    con = sqlite3.connect("instagram_artists_apresearch.db")
-    cursor = con.cursor()
+    conn = sqlite3.connect("instagram_artists_apresearch.db")
+    cursor = conn.cursor()
 
     # cmd = ""
     # cmd = """CREATE TABLE profiles(
