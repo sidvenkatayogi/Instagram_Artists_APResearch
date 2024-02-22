@@ -2,31 +2,23 @@ import instaloader
 import pandas as pd
 import numpy
  
-def read():
+def read(path):
     # creating a data frame
     bot = instaloader.Instaloader()
-    df = pd.read_csv("HA.csv")
-    # print(df.head())
-
-    # for col in df.columns[1:]:
-    #     for 
+    df = pd.read_csv(path)
     counter = 0
 
     for i in df.index:
-        # st = str(df.iloc[i,0]) + ", "
         for col in df.columns[1:]:
-            # st += str(df.loc[i,col]) + ", "
-            # print(f"{df.loc[i,col]}, {df.iloc[i,0]}")
             try:
-                p = instaloader.Profile.from_username(bot.context, str(df.loc[i,col]))
-                print(f"{p.userid}, {p.username}, {p.followers}, {p.mediacount}, human, {df.iloc[i,0]}")
+                if(pd.notna(df.loc[i,col])):
+                    p = instaloader.Profile.from_username(bot.context, df.loc[i,col])
+                    print(f"{p.userid}, {p.username}, {p.followers}, {p.mediacount}, human, {df.iloc[i,0]}")
+                    counter += 1
             except instaloader.ConnectionException:
                 print(f"Error with user: {df.loc[i,col]}")
-            counter += 1
-        # st = st[:-2]
-        # print(st)
-
     print(counter)
+
 # # Creating an instance of the Instaloader class
 bot = instaloader.Instaloader()
 # #bot.login(user="Your_username",passwd="Your_password") #Use this code to log-in to your account.
