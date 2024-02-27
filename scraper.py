@@ -2,6 +2,7 @@ import instaloader
 import pandas as pd
 import numpy
 import sqlite3
+import webbrowser as web
 
 # # Creating an instance of the Instaloader class
 bot = instaloader.Instaloader()
@@ -9,18 +10,55 @@ bot = instaloader.Instaloader()
 
 def read(path):
     # creating a data frame
+    conn = sqlite3.connect("instagram_artists_apresearch.db")
+    cursor = conn.cursor()
     df = pd.read_csv(path)
     # counter = 0
-
+    past = False
+    before = True
+    past_post = False
     for i in df.index:
         for col in df.columns[1:]:
+            curr_post = None
             try:
                 if(pd.notna(df.loc[i,col])):
-                    p = instaloader.Profile.from_username(bot.context, df.loc[i,col])
-                    print(f"{p.userid}, {p.username}, {p.followers}, {p.mediacount}, human, {df.iloc[i,0]}")
-                    counter += 1
-            except instaloader.ConnectionException:
-                print(f"Error with user: {df.loc[i,col]}")
+                    if(str(df.loc[i,col]) == "beksinski"):
+                        past = True
+                    # if(str(df.loc[i,col]) == "ahvero"):
+                    #     before = False
+                    #     break
+                    if(past and before):
+                        p = instaloader.Profile.from_username(bot.context, df.loc[i,col])
+                        # input("Go?")
+                        print(f"{p.userid}, {p.username}, {p.followers}, {p.mediacount}, human, {df.iloc[i,0]}")
+                        # cmd = """INSERT INTO PROFILES(USER_ID, USERNAME, NUM_FOLLOWERS, NUM_POSTS, IS_HUMAN, GENRE) 
+                        # VALUES ({}, "{}", {}, {}, {}, "{}");""".format(p.userid, p.username, p.followers, p.mediacount, True, df.iloc[i,0])
+                        # cursor.execute(cmd)
+                        for post in p.get_posts():
+                            
+                            # if(past_post):
+                                curr_post = post.shortcode
+                                cmd = """INSERT INTO POSTS(OWNER_USER_ID, OWNER_USERNAME, NUM_LIKES, NUM_COMMENTS, SHORTCODE, IMG_URL, POST_DATE, IS_REEL, IS_HUMAN, GENRE) 
+                                VALUES ({}, "{}", {}, {}, "{}", "{}", "{}", {}, {}, "{}");""".format(post.owner_id, post.owner_username, post.likes, post.comments, post.shortcode, post.url, post.date_utc, False, True, df.iloc[i,0])
+                                
+                                cursor.execute(cmd)
+                            # if (post.shortcode == "BgHhSMxBFpL"):
+                            #     past_post = True
+
+                        # for post in p.get_igtv_posts():
+                        #     cmd = """INSERT INTO POSTS(OWNER_USER_ID, OWNER_USERNAME, NUM_LIKES, NUM_COMMENTS, SHORTCODE, IMG_URL, POST_DATE, IS_REEL, GENRE) 
+                        #     VALUES ({}, "{}", {}, {}, "{}", "{}", {}, {}, "{}");""".format(post.owner_id, post.owner_username, post.likes, post.comments, post.shortcode, post.url, post.date_utc, False, df.iloc[i,0])
+                        #     cursor.execute(cmd)
+                        # web.open("https://www.instagram.com/" + p.username + "/")
+                    
+                    # counter += 1
+            except Exception as e:
+                conn.commit()
+                conn.close()
+                print(f"Error with {df.loc[i,col]}, after {curr_post} : {e}")
+                return
+    conn.commit()
+    conn.close()
     # print(counter)
 
 def sql():
@@ -37,6 +75,8 @@ def sql():
     # PRIMARY KEY (user_id)
     # );"""
 
+    # cmd = """ALTER TABLE Posts
+    #          ADD COLUMN genre VRACHAR(255);"""
     # cursor.execute(cmd)
 
     # cmd = """CREATE TABLE posts(
@@ -84,19 +124,29 @@ def downloadPost():
 
         # else:
         #     break
-    
+
 if __name__ == '__main__':
+    # p = instaloader.Profile.from_username(bot.context,"kuzminanastya")
+    # print(p.mediacount)
     # sql()
-    option = '0'
-    while option != '5':
-        option = input('Select Your option\n1)Get Profile Info\n2)Download Profile Posts\n3)Read CSV\n4)Exit\n')
-        if option == '1':
-            getBasicInfo()
-        elif option == '2':
-            downloadPost()
-        elif option == '3':
-            read()
-        elif option == '4':
-            exit
-        else:
-            print('Wrong input please try again\n')
+    # option = '0'
+    # while option != '5':
+    #     option = input('Select Your option\n1)Get Profile Info\n2)Download Profile Posts\n3)Read CSV\n4)Exit\n')
+    #     if option == '1':
+    #         sql()
+    #     elif option == '2':
+    #         downloadPost()
+    #     elif option == '3':
+    #         read("HA.csv")
+    #     elif option == '4':
+    #         exit
+    #     else:
+    #         print('Wrong input please try again\n')
+    read("HA.csv")
+    # conn = sqlite3.connect("instagram_artists_apresearch.db")
+    # cursor = conn.cursor()
+    # cursor.execute("""INSERT INTO PROFILES(USER_ID, USERNAME, NUM_FOLLOWERS, NUM_POSTS, IS_HUMAN, GENRE) 
+    #                     VALUES (1, "a", 1, 1, True, "b");""")
+    # p = instaloader.Profile.from_username(bot.context, "elphcomics")
+    # for post in p.get_posts():
+    #     print(post.likes)
